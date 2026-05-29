@@ -6,7 +6,6 @@ type WordSearchResult struct {
 	RowIndex    int
 	ColumnIndex int
 	Letter      string
-	Order       int
 }
 
 type WordSearch interface {
@@ -19,21 +18,20 @@ type wordSearch struct {
 	colCount int
 }
 
-func NewWordSearch(matrix [][]byte, rowCount int, colCount int) (WordSearch, error) {
-	if rowCount <= 0 || colCount <= 0 {
+func NewWordSearch(matrix [][]byte) (WordSearch, error) {
+	rc := len(matrix)
+	if rc <= 0 {
 		return nil, errors.New("rowCount and colCount must be greater than zero")
 	}
-	if len(matrix) != rowCount {
-		return nil, errors.New("matrix length must be equal to row count")
-	}
-	if len(matrix[0]) != colCount {
-		return nil, errors.New("matrix length must be equal to col count")
+	cc := len(matrix[0])
+	if cc <= 0 {
+		return nil, errors.New("rowCount and colCount must be greater than zero")
 	}
 
 	return &wordSearch{
 		matrix:   matrix,
-		rowCount: rowCount,
-		colCount: colCount,
+		rowCount: rc,
+		colCount: cc,
 	}, nil
 }
 
@@ -45,7 +43,40 @@ func makeNewVisitedMatrix(rowCount int, colCount int) [][]bool {
 	return visited
 }
 
+func (ws *wordSearch) checkLetterOccurance(word string) bool {
+	bmap := make(map[byte]int)
+	wmap := make(map[byte]int)
+
+	for i := 0; i < len(word); i++ {
+		wmap[word[i]]++
+	}
+
+	for i := 0; i < ws.rowCount; i++ {
+		for j := 0; j < ws.colCount; j++ {
+			bmap[ws.matrix[i][j]]++
+		}
+	}
+
+	for k, v := range wmap {
+		if bmap[k] < v {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (ws *wordSearch) Search(word string) (bool, []WordSearchResult) {
+	if len(word) == 0 {
+		return false, []WordSearchResult{}
+	}
+	if len(word) > ws.rowCount*ws.colCount {
+		return false, []WordSearchResult{}
+	}
+	if !ws.checkLetterOccurance(word) {
+		return false, []WordSearchResult{}
+	}
+
 	results := make(map[int]WordSearchResult)
 
 	for i, row := range ws.matrix {
@@ -53,16 +84,16 @@ func (ws *wordSearch) Search(word string) (bool, []WordSearchResult) {
 			visited := makeNewVisitedMatrix(ws.rowCount, ws.colCount)
 			found := ws.Dfs(i, j, 0, []byte(word), &visited, &results)
 			if found {
-				valuesResult := make([]WordSearchResult, 0)
-				for _, v := range results {
-					valuesResult = append(valuesResult, v)
+				valuesResult := make([]WordSearchResult, len(results))
+				for i, v := range results {
+					valuesResult[i] = v
 				}
 				return found, valuesResult
 			}
 		}
 	}
 
-	return false, make([]WordSearchResult, 0)
+	return false, []WordSearchResult{}
 }
 
 func (ws *wordSearch) Dfs(

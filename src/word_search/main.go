@@ -24,10 +24,10 @@ func main() {
 		requestedPattern4,
 	)
 
-	ws, err := NewWordSearch(matrix, 3, 4)
+	ws, err := NewWordSearch(matrix)
 	if err != nil {
 		fmt.Println(err)
 	}
-	results := ws.Search(requestedPattern1)
+	_, results := ws.Search(requestedPattern1)
 	println(results)
 }
