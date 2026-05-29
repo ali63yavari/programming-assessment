@@ -1,0 +1,122 @@
+# =========================
+# Go build artifacts
+# =========================
+
+# Compiled binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Go build output
+/bin/
+/dist/
+/build/
+
+# Common per-project build output
+src/*/bin/
+src/*/dist/
+src/*/build/
+
+# Go coverage files
+*.out
+coverage.out
+coverage.html
+
+# Go profiling files
+*.prof
+*.pprof
+
+# Go workspace file
+# Commit go.work only if the whole repository is intentionally managed
+# as a single Go workspace.
+go.work
+go.work.sum
+
+
+# =========================
+# Go dependency/vendor policy
+# =========================
+
+# Uncomment this only if you do NOT want to commit vendored dependencies.
+# vendor/
+
+
+# =========================
+# GoLand / JetBrains IDE files
+# =========================
+
+# JetBrains project metadata
+.idea/
+
+# JetBrains module files
+*.iml
+
+# GoLand generated files
+.idea_modules/
+
+# JetBrains caches / misc
+out/
+
+
+# =========================
+# OS files
+# =========================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+
+# =========================
+# Logs
+# =========================
+
+*.log
+logs/
+
+
+# =========================
+# Environment / secrets
+# =========================
+
+.env
+.env.*
+!.env.example
+!.env.sample
+
+*.local
+
+
+# =========================
+# Temporary files
+# =========================
+
+tmp/
+temp/
+.cache/
+
+
+# =========================
+# Docker / local runtime
+# =========================
+
+docker-compose.override.yml
+
+
+# =========================
+# Test artifacts
+# =========================
+
+testdata/tmp/
