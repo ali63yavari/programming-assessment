@@ -19,6 +19,7 @@ type JiraIssue struct {
 	Resolved    string    `sq:"selector=#resolutiondate-val time; mode=attr; attr=datetime"`
 	Description string    `sq:"selector=#description-val;mode=html"`
 	Comments    []Comment `sq:"selector=.activity-comment"`
+	Url         string
 }
 
 func (JiraIssue) RenderOptions() structquery.RenderOptions {

@@ -279,6 +279,7 @@ func jiraIssuePlaceholders(issue JiraIssue) map[string]string {
 	ptResolved, _ := utils.ParseStringToTimeAndEpoch(issue.Resolved)
 
 	return map[string]string{
+		"{{url}}":           cleanCell(issue.Url),
 		"{{GeneratedOn}}":   time.Now().Format("2006-01-02 15:04:05"),
 		"{{IssueKey}}":      cleanCell(issue.Key),
 		"{{Summary}}":       cleanCell(issue.Summary),

@@ -216,6 +216,10 @@ func extractInlineArray[TElmType any](
 		)
 	}
 
+	if strings.TrimSpace(c[0]) != strings.TrimSpace(configName) {
+		return res, fmt.Errorf("any field with name [%s] not found", configName)
+	}
+
 	if len(strings.TrimSpace(c[1])) == 0 {
 		return res, fmt.Errorf(
 			"invalid value format: [%s]",

@@ -36,6 +36,8 @@ func (jic *IssueCrawler) Crawl(ctx context.Context, url string) (JiraIssue, erro
 		return JiraIssue{}, nil
 	}
 
+	ji.Url = url
+
 	return ji, nil
 }
 
