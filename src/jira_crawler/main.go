@@ -2,10 +2,8 @@ package main
 
 import (
 	"fmt"
-	"jira_crawler/structquery"
 	"log"
 	"net/http"
-	"reflect"
 	"strings"
 	"unicode"
 
@@ -48,75 +46,32 @@ func ExampleScrape() {
 		log.Fatal(err)
 	}
 
-	typeVal := doc.Find("#type-val").Text()
-	println(CleanString(typeVal))
-	//// Find the review items
-	//doc.Find("#type-val").Each(
-	//	func(i int, s *goquery.Selection) {
-	//		// For each item found, get the title
-	//		title := s.Find("a").Text()
-	//		fmt.Printf("Review %d: %s\n", i, title)
-	//	},
-	//)
+	fmt.Println("container:", doc.Find("#issue_actions_container").Length())
+
+	fmt.Println("comments any:", doc.Find(".activity-comment").Length())
+
+	fmt.Println(
+		"comments descendant:",
+		doc.Find("#issue_actions_container .activity-comment").Length(),
+	)
+
+	fmt.Println(
+		"comments direct:",
+		doc.Find("#issue_actions_container > .activity-comment").Length(),
+	)
+
 }
 
-type nestedTst struct {
-	name string `gg:"nested name, nested struct"`
-}
-type tst struct {
-	name   string    `gg:"string,int,others"`
-	age    int       `gg:"format"`
-	grades []float32 `gg:"float32"`
-	nested nestedTst `gg:"nested"`
+type JiraIssue struct {
+	Comments []Comment `sq:"selector=#issue_actions_container > .activity-comment"`
 }
 
-func testReflect(out any) error {
-	v := reflect.ValueOf(out)
-
-	if v.Kind() != reflect.Pointer || v.IsNil() {
-		return fmt.Errorf("out should be a pointer to a struct")
-	}
-
-	v = v.Elem()
-
-	if v.Kind() != reflect.Struct {
-		return fmt.Errorf("output should be type of struct")
-	}
-
-	t := v.Type()
-
-	for i := 0; i < v.NumField(); i++ {
-		fieldVal := v.Field(i)
-		fieldType := t.Field(i)
-
-		fmt.Printf(
-			"field type: %v and field value: %v\n",
-			fieldType,
-			fieldVal.String(),
-		)
-	}
-
-	return nil
+type Comment struct {
+	Author  string `sq:"selector=.user-hover"`
+	Created string `sq:"selector=time; mode=attr; attr=datetime"`
+	Body    string `sq:"selector=.action-body"`
 }
 
 func main() {
 	ExampleScrape()
-	err := testReflect(&tst{})
-	println(err)
-
-	s1 := "selector =   rfgdfg  "
-	s2 := " required "
-
-	c1 := strings.Split(s1, "=")
-	c2 := strings.Split(s2, "=")
-
-	_ = c1
-	_ = c2
-
-	v, err := structquery.ExtractStringConfig[structquery.ExtractMode](
-		"mode=Html",
-		"mode",
-	)
-
-	_ = v
 }

@@ -28,7 +28,7 @@ func (em *ExtractMode) UnmarshalText(text []byte) error {
 	}
 }
 
-type FieldTagConfig struct {
+type fieldTagConfig struct {
 	Selector string
 	Mode     ExtractMode
 	Trim     TrimType
@@ -41,7 +41,18 @@ type FieldTagConfig struct {
 	Match    string
 }
 
-func (ftc FieldTagConfig) validate(fieldType reflect.Type) error {
+func newValidFieldTagConfig() *fieldTagConfig {
+	return &fieldTagConfig{
+		Selector: "",
+		Mode:     ModeText,
+		Trim:     TrimAll,
+		Attr:     "",
+		NonEmpty: false,
+		Required: false,
+	}
+}
+
+func (ftc fieldTagConfig) validate(fieldType reflect.Type) error {
 	if ftc.Selector == "" {
 		return fmt.Errorf("selector is required")
 	}

@@ -63,7 +63,6 @@ func splitTagInlineConfig(tag string) []string {
 
 	return parts
 }
-
 func tagContentIsValid(tagContent string) bool {
 	if tagContent == "" || tagContent == "-" {
 		return false
@@ -71,7 +70,7 @@ func tagContentIsValid(tagContent string) bool {
 
 	return true
 }
-func parseTagContent(tagContent string) (*FieldTagConfig, error) {
+func parseTagContent(tagContent string) (*fieldTagConfig, error) {
 	if !tagContentIsValid(tagContent) {
 		return nil, errors.New("invalid tag content")
 	}
@@ -80,7 +79,7 @@ func parseTagContent(tagContent string) (*FieldTagConfig, error) {
 		return nil, errors.New("tag should include at least a valid rawConfig")
 	}
 
-	tc := FieldTagConfig{}
+	tc := newValidFieldTagConfig()
 	for _, rawConfig := range rawConfigs {
 		v, err := extractStringConfig[string](rawConfig, "selector")
 		if err == nil {
@@ -126,9 +125,8 @@ func parseTagContent(tagContent string) (*FieldTagConfig, error) {
 		log.Println("inserted tag content does not include any meaningful command")
 	}
 
-	return &tc, nil
+	return tc, nil
 }
-
 func parseEnum[TElmType any](s string) (TElmType, error) {
 	var result TElmType
 
@@ -182,7 +180,6 @@ func parseString[TElmType any](s string) (TElmType, error) {
 
 	return result, nil
 }
-
 func extractBoolOrFlag(rawConfig, configName string) (bool, error) {
 	c := strings.Split(rawConfig, "=")
 	if strings.TrimSpace(c[0]) == strings.TrimSpace(configName) {
@@ -197,7 +194,6 @@ func extractBoolOrFlag(rawConfig, configName string) (bool, error) {
 
 	return false, fmt.Errorf("any field with name [%s] not found", configName)
 }
-
 func extractInlineArray[TElmType any](
 	rawConfig, configName,
 	arraySeparator string,
@@ -238,7 +234,6 @@ func extractInlineArray[TElmType any](
 
 	return res, nil
 }
-
 func extractStringConfig[TElmType any](rawConfig, configName string) (
 	TElmType,
 	error,
