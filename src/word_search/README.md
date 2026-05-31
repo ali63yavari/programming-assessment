@@ -1,6 +1,6 @@
 # Task 1 — Word Search
 
-## 1. Overview
+## Overview
 
 This repository contains the Go implementation for **Task 1: Word Search** from the programming assessment.
 
@@ -10,7 +10,7 @@ The implementation is written in Go and focuses on correctness, readability, tes
 
 ---
 
-## 2. Problem Statement
+## Problem Statement
 
 Given a 2D board of letters and a target word, determine whether the word can be formed by walking through sequentially adjacent cells.
 
@@ -43,7 +43,7 @@ ABCB   => false
 
 ---
 
-## 3. Implemented API
+## Implemented API
 
 The solution exposes a small interface:
 
@@ -86,7 +86,7 @@ Example path for `ABCCED`:
 
 ---
 
-## 4. Theoretical Solution
+## Theoretical Solution
 
 The core algorithm is **Depth-First Search with Backtracking**.
 
@@ -109,9 +109,9 @@ If none of these conditions apply, the cell is accepted as part of the current p
 
 ---
 
-## 5. Implementation Design
+## Implementation Design
 
-### 5.1 Constructor Validation
+### Constructor Validation
 
 The constructor validates that the board has at least one row and at least one column:
 
@@ -131,7 +131,7 @@ Covered invalid cases include:
 - empty matrix
 - matrix with an empty first row
 
-### 5.2 Search Flow
+### Search Flow
 
 The public `Search` method applies three early checks before running DFS:
 
@@ -141,7 +141,7 @@ The public `Search` method applies three early checks before running DFS:
 
 After these validations, the algorithm tries every board cell as a potential starting point.
 
-### 5.3 Visited Matrix
+### Visited Matrix
 
 For every starting cell, a fresh visited matrix is created:
 
@@ -151,7 +151,7 @@ visited := makeNewVisitedMatrix(ws.rowCount, ws.colCount)
 
 This keeps each DFS attempt isolated and avoids leaking visited state from one start position into another.
 
-### 5.4 Path Tracking
+### Path Tracking
 
 The implementation stores the successful route in a map keyed by the word index:
 
@@ -173,11 +173,11 @@ This allows the final output to explain not only that a word exists, but also ho
 
 ---
 
-## 6. Novelty Added
+## Novelty Added
 
 Although the classic solution to Word Search is DFS with backtracking, this implementation adds practical improvements around the core algorithm.
 
-### 6.1 Path-Aware Search Result
+### Path-Aware Search Result
 
 Most simple Word Search implementations return only `true` or `false`. This implementation also returns the exact path of the discovered word.
 
@@ -197,7 +197,7 @@ Path:
 5: row=2, col=1, letter=D
 ```
 
-### 6.2 Frequency-Based Pre-Search Pruning
+### Frequency-Based Pre-Search Pruning
 
 Before running DFS, the implementation counts the letters in the board and the letters required by the word.
 
@@ -217,7 +217,7 @@ The board contains only four `A` cells, but the word requires five `A` character
 
 This avoids unnecessary recursive search and improves performance for impossible inputs.
 
-### 6.3 Explicit Test Coverage for Problem Constraints
+### Explicit Test Coverage for Problem Constraints
 
 The test suite does not only test the happy path. It also verifies the important constraints from the problem statement:
 
@@ -231,7 +231,7 @@ The test suite does not only test the happy path. It also verifies the important
 
 ---
 
-## 7. Complexity Analysis
+## Complexity Analysis
 
 Let:
 
@@ -265,11 +265,11 @@ The `R × C` term comes from the visited matrix. The `L` term comes from the rec
 
 ---
 
-## 8. Test Cases
+## Test Cases
 
 The project includes table-driven Go tests in `word_search_test.go`.
 
-### 8.1 Happy Cases
+### Happy Cases
 
 | Test Case | Board Type | Word | Expected |
 |---|---|---:|---:|
@@ -279,7 +279,7 @@ The project includes table-driven Go tests in `word_search_test.go`.
 | Repeated letters | 2×2 board of `A`s | `AAA` | `true` |
 | Whole matrix repeated letters | 2×2 board of `A`s | `AAAA` | `true` |
 
-### 8.2 Corner Cases
+### Corner Cases
 
 | Test Case | Purpose | Expected |
 |---|---|---:|
@@ -295,9 +295,9 @@ The project includes table-driven Go tests in `word_search_test.go`.
 
 ---
 
-## 9. How to Run
+## How to Run
 
-### 9.1 Prerequisites
+### Prerequisites
 
 Install Go:
 
@@ -307,7 +307,7 @@ go version
 
 The implementation uses only the Go standard library.
 
-### 9.2 Run Tests
+### Run Tests
 
 From the project directory:
 
@@ -321,7 +321,7 @@ Expected result:
 ok
 ```
 
-### 9.3 Run Tests Verbosely
+### Run Tests Verbosely
 
 ```bash
 go test -v ./...
@@ -329,7 +329,7 @@ go test -v ./...
 
 ---
 
-## 10. Assumptions
+## Assumptions
 
 This implementation follows the assessment problem statement and uses the following assumptions:
 
@@ -344,7 +344,7 @@ This implementation follows the assessment problem statement and uses the follow
 
 ---
 
-## 11. Notes for Further Improvement
+## Notes for Further Improvement
 
 The current solution is intentionally focused and readable. Possible future improvements include:
 
@@ -353,11 +353,3 @@ The current solution is intentionally focused and readable. Possible future impr
 3. Replace the visited matrix with in-place marking to reduce auxiliary memory, while keeping the current approach for clarity and safety.
 4. Add benchmark tests for large boards and repeated-character worst-case scenarios.
 5. Add a small CLI wrapper so users can provide a board and word from the command line.
-
----
-
-## 12. Summary
-
-This solution implements the Word Search task using DFS with backtracking, supported by input validation, early pruning, path tracking, and comprehensive table-driven tests.
-
-The main strength of the implementation is that it is not limited to a boolean answer. It can also explain the successful path, making the result transparent, debuggable, and easier to evaluate.
