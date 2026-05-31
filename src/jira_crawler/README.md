@@ -1,6 +1,6 @@
-# Issue Crawler - Dynamic Jira Issue Extraction and Export Tool
+# Issue Crawler
 
-A Go-based programming assessment project that crawls rendered Jira issue pages, extracts structured issue data, manages crawl sessions, and exports the latest successful result to CSV or XLSX.
+> A Go-based programming assessment project that crawls rendered Jira issue pages, extracts structured issue data, manages crawl sessions, and exports the latest successful result to CSV or XLSX.
 
 ## Overview
 
@@ -38,14 +38,6 @@ The solution avoids placing one-off scraping logic directly in the CLI. Instead,
 - Date parsing and Unix epoch conversion for issue and comment timestamps.
 - Runnable example under `examples/jira_issue`.
 
-## Current Version Scope
-
-The current version uses an in-memory store. Crawler definitions, sessions, statuses, errors, and latest crawl results exist only while the CLI process is running. When the process exits, that state is lost.
-
-User-defined crawler definitions through YAML are part of the intended future design but are not implemented in this version. The only available crawler definition is the predefined `jira-issue` definition.
-
-The CLI is intentionally designed as an interactive shell. Because state is in memory, separate one-shot invocations would not be able to share sessions or crawl results without a persistence layer.
-
 ## Architecture
 
 The project is organized into focused packages:
@@ -62,20 +54,6 @@ The project is organized into focused packages:
 - `utils`: date parsing and epoch conversion helpers.
 - `templates`: built-in CSV and XLSX export templates.
 - `examples`: runnable demonstration code.
-
-```text
-User CLI
-  -> cli_shell/app Service
-  -> cli_shell/store MemoryStore
-  -> cli_shell/crawler JiraIssueEngine
-  -> crawlerengine/jira IssueCrawler
-  -> structquery RodRenderer
-  -> Rendered HTML
-  -> goquery Document
-  -> Reflection Mapper
-  -> JiraIssue Result
-  -> CSV/XLSX Exporter
-```
 
 ## Why Rod Rendering Is Used
 
@@ -212,66 +190,6 @@ templates/jira_template.csv
 templates/jira_template.xlsx
 ```
 
-Issue placeholders currently used by the exporters:
-
-- `{{GeneratedOn}}`
-- `{{IssueKey}}`
-- `{{Summary}}`
-- `{{Type}}`
-- `{{Status}}`
-- `{{Priority}}`
-- `{{Resolution}}`
-- `{{Assignee}}`
-- `{{Reporter}}`
-- `{{Created}}`
-- `{{CreatedEpoch}}`
-- `{{Updated}}`
-- `{{UpdatedEpoch}}`
-- `{{Resolved}}`
-- `{{ResolvedEpoch}}`
-- `{{Description}}`
-
-CSV comment placeholders:
-
-- `{{CommentNo}}`
-- `{{CommentAuthor}}`
-- `{{CommentCreated}}`
-- `{{CommentCreatedEpoch}}`
-- `{{CommentBody}}`
-
-The XLSX template also contains numbered comment placeholders such as `{{CommentAuthor1}}`, but the current exporter writes comment cells directly rather than replacing those placeholders through the generic sheet placeholder map.
-
-## Data Model
-
-The Jira issue model extracts:
-
-- Issue key
-- Summary
-- Type
-- Status
-- Priority
-- Resolution
-- Assignee
-- Reporter
-- Created date
-- Created epoch
-- Updated date
-- Updated epoch
-- Resolved date
-- Resolved epoch
-- Description
-- Comments
-
-Each comment contains:
-
-- ID
-- Author
-- Created date
-- Created epoch
-- Body
-
-Epoch values are produced with Go's `time.Time.Unix()`, so the exported numeric value is Unix seconds.
-
 ## Running Examples
 
 The repository includes one runnable example:
@@ -280,24 +198,21 @@ The repository includes one runnable example:
 go run ./examples/jira_issue
 ```
 
-The example crawls `https://issues.apache.org/jira/browse/CAMEL-10597`, exports `output/test.csv` and `output/test.xlsx`, and prints extracted fields and comments.
-
 ## Future Improvements
-
-- YAML-based crawler definition import.
-- Persistent storage such as SQLite or BoltDB.
-- One-shot CLI commands after persistence is introduced.
-- Crawl run history.
-- Stronger crawler definition validation.
-- Additional crawler definitions, such as GitHub Issues or GitLab Issues.
-- Configurable render policies per crawler/session.
-- Authentication and session-cookie support.
-- Batch crawling.
-- Parallel crawling.
-- Configurable template paths.
-- Richer export customization.
-- Automated tests and CI.
-- Propagation of lower-level crawl errors from the Jira crawler wrapper.
+-[ ] YAML-based crawler definition import.
+-[ ] Persistent storage such as SQLite or BoltDB.
+-[ ] One-shot CLI commands after persistence is introduced.
+-[ ] Crawl run history.
+-[ ] Stronger crawler definition validation.
+-[ ] Additional crawler definitions, such as GitHub Issues or GitLab Issues.
+-[ ] Configurable render policies per crawler/session.
+-[ ] Authentication and session-cookie support.
+-[ ] Batch crawling.
+-[ ] Parallel crawling.
+-[ ] Configurable template paths.
+-[ ] Richer export customization.
+-[ ] Automated tests and CI.
+-[ ] Propagation of lower-level crawl errors from the Jira crawler wrapper.
 
 ## Project Structure
 
@@ -385,5 +300,4 @@ Suggested review path:
 9. Review `crawlerengine/jira/exporter.go` to see template-based export handling.
 
 ## Final Notes
-
-The current implementation prioritizes clarity, separation of concerns, and extensibility. The Jira crawler is intentionally treated as the first predefined crawler definition rather than as ad hoc CLI logic. The architecture is prepared for future dynamic definitions, persistence, and additional export or crawler types, while the present version remains focused on a reviewable Jira issue crawling workflow.
+> The current implementation prioritizes clarity, separation of concerns, and extensibility. The Jira crawler is intentionally treated as the first predefined crawler definition rather than as ad hoc CLI logic. The architecture is prepared for future dynamic definitions, persistence, and additional export or crawler types, while the present version remains focused on a reviewable Jira issue crawling workflow.
