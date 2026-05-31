@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"jira_crawler/issue_crawler"
-	"jira_crawler/issue_crawler/jira"
+	"jira_crawler/crawlerengine"
+	"jira_crawler/crawlerengine/jira"
 	"log"
 )
 
@@ -12,23 +12,19 @@ const issueURL = "https://issues.apache.org/jira/browse/CAMEL-10597"
 const issueURL2 = "https://issues.apache.org/jira/browse/CAMEL-23239"
 
 func main() {
-	crawler, err := jira.NewJiraIssueCrawler(
-		context.Background(),
-		issueURL2,
-	)
+	crawler, err := jira.NewJiraIssueCrawler()
 
 	if err != nil {
 		panic(err)
 	}
 
-	if err := crawler.Crawl(); err != nil {
+	issue, err := crawler.Crawl(context.Background(), issueURL)
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	var issue = crawler.GetJiraIssue()
-
-	err = crawler.Export(issue_crawler.ExportCSV, "output/test.csv")
-	err = crawler.Export(issue_crawler.ExportExcel, "output/test.xlsx")
+	err = crawler.Export(crawlerengine.ExportCSV, "output/test.csv", issue)
+	err = crawler.Export(crawlerengine.ExportExcel, "output/test.xlsx", issue)
 
 	fmt.Println("")
 

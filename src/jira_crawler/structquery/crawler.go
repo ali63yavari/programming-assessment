@@ -16,31 +16,29 @@ import (
 )
 
 type Crawler interface {
-	Crawl(ctx context.Context, output any) error
+	Crawl(ctx context.Context, url string, output any) error
 }
 type crawler struct {
-	url      string
 	renderer RodRenderer
 	doc      *goquery.Document
 }
 
-func NewCrawler(url string) (Crawler, error) {
+func NewCrawler() (Crawler, error) {
 	crawlPage := &crawler{
-		url:      url,
 		renderer: RodRenderer{},
 	}
 
 	return crawlPage, nil
 }
 
-func (c *crawler) Crawl(ctx context.Context, output any) error {
+func (c *crawler) Crawl(ctx context.Context, url string, output any) error {
 	if output == nil {
 		return fmt.Errorf("out cannot be nil")
 	}
 
 	opts := ResolveRenderOptions(output)
 
-	htmlStr, err := c.renderer.Render(ctx, c.url, opts)
+	htmlStr, err := c.renderer.Render(ctx, url, opts)
 	if err != nil {
 		return fmt.Errorf("render page: %w", err)
 	}

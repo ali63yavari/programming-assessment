@@ -1,4 +1,4 @@
-package issue_crawler
+package crawlerengine
 
 type ExportType string
 
@@ -9,5 +9,5 @@ const (
 )
 
 type IssueCrawlerExporter interface {
-	Export(exportType ExportType, outputPath string) error
+	Export(exportType ExportType, outputPath string, output any) error
 }
