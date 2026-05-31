@@ -199,20 +199,20 @@ go run ./examples/jira_issue
 ```
 
 ## Future Improvements
--[ ] YAML-based crawler definition import.
--[ ] Persistent storage such as SQLite or BoltDB.
--[ ] One-shot CLI commands after persistence is introduced.
--[ ] Crawl run history.
--[ ] Stronger crawler definition validation.
--[ ] Additional crawler definitions, such as GitHub Issues or GitLab Issues.
--[ ] Configurable render policies per crawler/session.
--[ ] Authentication and session-cookie support.
--[ ] Batch crawling.
--[ ] Parallel crawling.
--[ ] Configurable template paths.
--[ ] Richer export customization.
--[ ] Automated tests and CI.
--[ ] Propagation of lower-level crawl errors from the Jira crawler wrapper.
+- YAML-based crawler definition import.
+- Persistent storage such as SQLite or BoltDB.
+- One-shot CLI commands after persistence is introduced.
+- Crawl run history.
+- Stronger crawler definition validation.
+- Additional crawler definitions, such as GitHub Issues or GitLab Issues.
+- Configurable render policies per crawler/session.
+- Authentication and session-cookie support.
+- Batch crawling.
+- Parallel crawling.
+- Configurable template paths.
+- Richer export customization.
+- Automated tests and CI.
+- Propagation of lower-level crawl errors from the Jira crawler wrapper.
 
 ## Project Structure
 
