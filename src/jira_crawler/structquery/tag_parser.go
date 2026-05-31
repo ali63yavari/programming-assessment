@@ -1,9 +1,11 @@
 package structquery
 
 import (
+	"encoding"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -80,12 +82,48 @@ func parseTagContent(tagContent string) (*FieldTagConfig, error) {
 
 	tc := FieldTagConfig{}
 	for _, rawConfig := range rawConfigs {
-		c := strings.Split(rawConfig, "=")
-		if strings.TrimSpace(c[0]) == "selector" {
-			tc.Selector = strings.TrimSpace(c[1])
+		v, err := extractStringConfig[string](rawConfig, "selector")
+		if err == nil {
+			tc.Selector = v
+			continue
+		}
+		v1, err := extractStringConfig[ExtractMode](rawConfig, "mode")
+		if err == nil {
+			tc.Mode = v1
+			continue
+		}
+		v2, err := extractStringConfig[TrimType](rawConfig, "trim")
+		if err == nil {
+			tc.Trim = v2
+			continue
+		}
+		v, err = extractStringConfig[string](rawConfig, "attr")
+		if err == nil {
+			tc.Attr = v
+			continue
+		}
+		v3, err := extractBoolOrFlag(rawConfig, "nonempty")
+		if err == nil {
+			tc.NonEmpty = v3
+			continue
+		}
+		v3, err = extractBoolOrFlag(rawConfig, "required")
+		if err == nil {
+			tc.Required = v3
+			continue
+		}
+		v4, err := extractInlineArray[string](rawConfig, "enum", "|")
+		if err == nil {
+			tc.Enums = v4
+			continue
+		}
+		v, err = extractStringConfig[string](rawConfig, "match")
+		if err == nil {
+			tc.Match = v
 			continue
 		}
 
+		log.Println("inserted tag content does not include any meaningful command")
 	}
 
 	return &tc, nil
@@ -94,12 +132,18 @@ func parseTagContent(tagContent string) (*FieldTagConfig, error) {
 func parseEnum[TElmType any](s string) (TElmType, error) {
 	var result TElmType
 
-	quotedJSON := fmt.Sprintf("%q", s)
+	if unmarshaler, ok := any(&result).(encoding.TextUnmarshaler); ok {
+		if err := unmarshaler.UnmarshalText([]byte(s)); err != nil {
+			return result, err
+		}
+		return result, nil
+	}
 
-	err := json.Unmarshal([]byte(quotedJSON), &result)
-	if err != nil {
+	qJSON := fmt.Sprintf("%q", s)
+	if err := json.Unmarshal([]byte(qJSON), &result); err != nil {
 		return result, err
 	}
+
 	return result, nil
 }
 func parseString[TElmType any](s string) (TElmType, error) {
@@ -139,41 +183,6 @@ func parseString[TElmType any](s string) (TElmType, error) {
 	return result, nil
 }
 
-func extractStringConfig[TElmType any](rawConfig, configName string) (
-	TElmType,
-	error,
-) {
-	var res TElmType
-	if strings.TrimSpace(rawConfig) == "" {
-		return res, fmt.Errorf("any field with name [%s] not found", configName)
-	}
-
-	c := strings.Split(rawConfig, "=")
-	if len(c) != 2 {
-		return res, fmt.Errorf(
-			"[%s] config should be in form of [key=value]",
-			configName,
-		)
-	}
-	if len(strings.TrimSpace(c[1])) == 0 {
-		//TODO: maybe it needs to investigated more
-	}
-
-	if strings.TrimSpace(c[0]) == strings.TrimSpace(configName) {
-		v, err := parseString[TElmType](strings.TrimSpace(c[1]))
-		if err != nil {
-			return res, fmt.Errorf(
-				"invalid value format:\n[%s]",
-				err,
-			)
-		}
-
-		return v, nil
-	}
-
-	return res, fmt.Errorf("any field with name [%s] not found", configName)
-}
-
 func extractBoolOrFlag(rawConfig, configName string) (bool, error) {
 	c := strings.Split(rawConfig, "=")
 	if strings.TrimSpace(c[0]) == strings.TrimSpace(configName) {
@@ -189,7 +198,7 @@ func extractBoolOrFlag(rawConfig, configName string) (bool, error) {
 	return false, fmt.Errorf("any field with name [%s] not found", configName)
 }
 
-func ExtractInlineArray[TElmType any](
+func extractInlineArray[TElmType any](
 	rawConfig, configName,
 	arraySeparator string,
 ) ([]TElmType, error) {
@@ -228,4 +237,43 @@ func ExtractInlineArray[TElmType any](
 	}
 
 	return res, nil
+}
+
+func extractStringConfig[TElmType any](rawConfig, configName string) (
+	TElmType,
+	error,
+) {
+	var res TElmType
+	if strings.TrimSpace(rawConfig) == "" {
+		return res, fmt.Errorf("any field with name [%s] not found", configName)
+	}
+
+	c := strings.Split(rawConfig, "=")
+	if len(c) != 2 {
+		return res, fmt.Errorf(
+			"[%s] config should be in form of [key=value]",
+			configName,
+		)
+	}
+	if len(strings.TrimSpace(c[1])) == 0 {
+		//TODO: maybe it needs to investigated more
+	}
+
+	if strings.TrimSpace(c[0]) == strings.TrimSpace(configName) {
+		v, err := parseString[TElmType](strings.TrimSpace(c[1]))
+		if err != nil {
+			v1, err := parseEnum[TElmType](strings.TrimSpace(c[1]))
+			if err != nil {
+				return res, fmt.Errorf(
+					"invalid value format:\n[%s]",
+					err,
+				)
+			}
+			return v1, nil
+		}
+
+		return v, nil
+	}
+
+	return res, fmt.Errorf("any field with name [%s] not found", configName)
 }

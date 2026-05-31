@@ -56,6 +56,9 @@ func (c *crawler) CrawlNow(output any) error {
 		if err != nil {
 			continue
 		}
+		if err := config.validate(fieldType.Type); err != nil {
+			continue
+		}
 
 		if fieldValue.Kind() == reflect.Slice {
 			err = c.setSliceField(fieldValue, config, c.doc.Selection)

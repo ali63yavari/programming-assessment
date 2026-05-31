@@ -16,12 +16,24 @@ const (
 	ModeCount     ExtractMode = "count"
 )
 
+func (em *ExtractMode) UnmarshalText(text []byte) error {
+	v := ExtractMode(text)
+
+	switch v {
+	case ModeText, ModeAttr, ModeHTML, ModeOuterHTML, ModeExists, ModeCount:
+		*em = v
+		return nil
+	default:
+		return fmt.Errorf("invalid ExtractMode [%s]", text)
+	}
+}
+
 type FieldTagConfig struct {
 	Selector string
 	Mode     ExtractMode
 	Trim     TrimType
 	Attr     string
-	NotEmpty bool
+	NonEmpty bool
 	Required bool
 	Each     bool
 	Split    string

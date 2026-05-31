@@ -15,6 +15,18 @@ const (
 	TrimControl TrimType = "control"
 )
 
+func (tt *TrimType) UnmarshalText(text []byte) error {
+	v := TrimType(text)
+
+	switch v {
+	case TrimNone, TrimAll, TrimSpace, TrimControl:
+		*tt = v
+		return nil
+	default:
+		return fmt.Errorf("invalid TrimType [%s]", text)
+	}
+}
+
 func TrimText(trim TrimType, text string) (string, error) {
 	switch trim {
 	case TrimNone:

@@ -113,9 +113,9 @@ func main() {
 	_ = c1
 	_ = c2
 
-	v, err := structquery.ExtractInlineArray[string](
-		"enum=Bug|Task|Improvement",
-		"enum", "|",
+	v, err := structquery.ExtractStringConfig[structquery.ExtractMode](
+		"mode=Html",
+		"mode",
 	)
 
 	_ = v
