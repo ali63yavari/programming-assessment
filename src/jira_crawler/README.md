@@ -1,4 +1,4 @@
-# Issue Crawler
+# Task 2 - Issue Crawler
 
 > A Go-based programming assessment project that crawls rendered Jira issue pages, extracts structured issue data, manages crawl sessions, and exports the latest successful result to CSV or XLSX.
 
