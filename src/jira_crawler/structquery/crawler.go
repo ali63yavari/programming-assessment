@@ -2,10 +2,9 @@ package structquery
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
-	"log"
-	"net/http"
 	"reflect"
 	"regexp"
 	"slices"
@@ -17,40 +16,40 @@ import (
 )
 
 type Crawler interface {
-	CrawlNow(output any) error
+	Crawl(ctx context.Context, output any) error
 }
 type crawler struct {
-	url string
-	doc *goquery.Document
+	url      string
+	renderer RodRenderer
+	doc      *goquery.Document
 }
 
-func NewCrawlingPage(url string) (Crawler, error) {
-	res, err := http.Get(url)
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
-	defer res.Body.Close()
-	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
-		return nil, err
-	}
-
-	doc, err := goquery.NewDocumentFromReader(res.Body)
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
-
+func NewCrawler(url string) (Crawler, error) {
 	crawlPage := &crawler{
-		url: url,
-		doc: doc,
+		url:      url,
+		renderer: RodRenderer{},
 	}
 
 	return crawlPage, nil
 }
 
-func (c *crawler) CrawlNow(output any) error {
+func (c *crawler) Crawl(ctx context.Context, output any) error {
+	if output == nil {
+		return fmt.Errorf("out cannot be nil")
+	}
+
+	opts := ResolveRenderOptions(output)
+
+	htmlStr, err := c.renderer.Render(ctx, c.url, opts)
+	if err != nil {
+		return fmt.Errorf("render page: %w", err)
+	}
+
+	c.doc, err = goquery.NewDocumentFromReader(strings.NewReader(htmlStr))
+	if err != nil {
+		return fmt.Errorf("parse rendered htmlStr: %w", err)
+	}
+
 	return unmarshalStruct(c.doc.Selection, output)
 }
 
@@ -88,7 +87,7 @@ func unmarshalStruct(root *goquery.Selection, output any) error {
 			continue
 		}
 
-		selection := root.Find(config.Selector)
+		selection := findSelection(root, config.Selector)
 
 		if err := setField(fieldValue, config, selection); err != nil {
 			return fmt.Errorf("field %s: %w", fieldType.Name, err)
@@ -304,12 +303,14 @@ func validateExtractedValue(rawValue string, config *fieldTagConfig) error {
 		}
 	}
 
-	if !slices.Contains(config.Enums, s) {
-		return fmt.Errorf(
-			"config forced enums [%q] but `%s` is not member of that",
-			config.Enums,
-			s,
-		)
+	if len(config.Enums) != 0 {
+		if !slices.Contains(config.Enums, s) {
+			return fmt.Errorf(
+				"config forced enums [%q] but `%s` is not member of that",
+				config.Enums,
+				s,
+			)
+		}
 	}
 
 	pattern := strings.TrimSpace(config.Match)
@@ -383,4 +384,13 @@ func parseStringByType(s string, targetType reflect.Type) (reflect.Value, error)
 	default:
 		return reflect.Value{}, fmt.Errorf("unsupported target type: %s", targetType)
 	}
+}
+func findSelection(root *goquery.Selection, selector string) *goquery.Selection {
+	selector = strings.TrimSpace(selector)
+
+	if selector == "." || selector == "" {
+		return root
+	}
+
+	return root.Find(selector)
 }
